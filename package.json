@@ -1,0 +1,41 @@
+{
+  "name": "grunt-jade-creplace",
+  "description": "a jade-creplace plugin",
+  "version": "0.0.1",
+  "homepage": "https://github.com/nihaox1/grunt-jade-creplace.git",
+  "author": {
+    "name": "bo.cheng",
+    "email": "chen8114@sina.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nihaox1/grunt-jade-creplace/issues"
+  },
+  "bugs": {
+    "url": "https://github.com/nihaox1/grunt-jade-creplace/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/bocheng/grunt-jade-creplace/blob/master/LICENSE-MIT"
+    }
+  ],
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5" ,
+    "md5"   : "^2.0.0" ,
+    "uglify-js"     : "^2.4.15",
+    "clean-css"     : "^2.2.1"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.5"
+  },
+  "keywords": [
+    "grunt-jade-creplace grunt-creplace"
+  ]
+}
