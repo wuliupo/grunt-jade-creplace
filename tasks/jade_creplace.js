@@ -9,10 +9,12 @@ var grunt ,
     config ,
     tool ,
     Jade ,
+    E ,
     MD5     = require( "md5" ) ,
     Path    = require( "path" ) ,
     minjs   = require( "uglify-js" ),
-    mincss  = require( "clean-css" );
+    mincss  = require( "clean-css" ),
+    _       = require( "underscore" );
 
 'use strict';
 
@@ -62,7 +64,7 @@ Jade.fn     = Jade.prototype    = {
      */
     replaceJs : function(){
         var _replace    = this.config.tp + "$1" + this.config.tp,
-            _al         = this.config.jade.replace( /(script\([^\)|^\n|^\r|]*\))/gi , _replace ).split( this.config.tp ),
+            _al         = this.config.jade.replace( /(script\([^\)|^\n|^\r]*\))/gi , _replace ).split( this.config.tp ),
             _js         = [],
             _url        = "js/" + this.config.md5 + ".js";
         for( var i = _al.length; i--; ){
@@ -140,6 +142,7 @@ tool    = {
              */
             resources   : {},
             ignoreUrl   : [],
+            ignoreSource: false ,
             redirectOrigin : ""
         }
         return this;
@@ -160,7 +163,7 @@ tool    = {
      *  @belong {string}    归属文件的相对地址
      */
     getResourcePath : function( url , belong ){
-        return ( belong.replace( /(.*[\/|\\]).*/gi , "$1" ) + url.replace( /\?|\#.*/gi , "" ) ).
+        return ( belong.replace( /(.*[\/|\\]).*/gi , "$1" ) + url.replace( /[\?|\#].*/gi , "" ) ).
                     replace( /[\\|\/][^\\|^\/]*[\\|\/]\.{2}/gi , "" );
     },
     /*!
@@ -173,6 +176,7 @@ tool    = {
         var _spilt  = "cb==cb",
             _imgs   = str.replace( /\s+/gi , " " ).replace( /url\(([^\)]*)\)/gi , _spilt + "$1" + _spilt ).split( _spilt ),
             _md5,
+            _img,
             _dest;
         for( var i = _imgs.length; i--; ){
             if( i % 2 ){
@@ -276,19 +280,37 @@ tool    = {
         }
     },
     checkFileStatus : function( filePath , func ){
-        var _isIgnore = false,
+        var _isIgnore   = false,
+            _isPass     = false,
             _exists;
         if( /\.(com|cn|net|org|me)\//.test( filePath ) ){
             for( var i = config.ignoreUrl.length; i--; ){
-                if( config.ignoreUrl[ i ].test( filePath ) ){
+                if( _.isRegExp( config.ignoreUrl[ i ] ) && config.ignoreUrl[ i ].test( filePath ) ){
                     _isIgnore = true;
                     filePath = filePath.replace( config.ignoreUrl[ i ] , "$1" );
                     break;
-                };
-            };
-        };
-        _exists = grunt.file.exists( Path.join( config.dir.srcDir , filePath ) );
+                }
+            }
+        }
+        for( var i = config.ignoreSource.length; i--; ){
+            if( config.ignoreSource[ i ] === filePath ){
+                _isPass = true;
+                _exists = false;
+                break;
+            }
+        }
+        if( !_isPass ){
+            _exists = grunt.file.exists( Path.join( config.dir.srcDir , filePath ) );
+        }
         func( _exists , ( _isIgnore && !_exists ? config.redirectOrigin : "" ) + filePath );
+    },
+    copyOtherFiles : function(){
+        var _url = function( url ){
+                return Path.join( config.dir.pub_dir , url.replace( /^[^\\|\/]*[\/|\\]/gi , "" ) )
+            };
+        for( var a in config.resources ){
+            grunt.file.copy( a , Path.join( config.dir.pubDir , config.resources[ a ] ) );
+        }
     },
     getHtmlFiles  : function( dir ){
         grunt.file.recurse( dir , function( path ){
@@ -309,8 +331,10 @@ tool    = {
             config.redirectOrigin   = file.redirectOrigin || "";
             config.ignoreUrl        = file.ignoreUrl instanceof Array ? file.ignoreUrl : 
                                         file.ignoreUrl ? [ file.ignoreUrl ] : [];
-            config.ignoreTsUrl      = file.ignoreTsUrl instanceof Array ? file.ignoreTsUrl : 
+            config.ignoreTsUrl      = file.ignoreTsUrl instanceof Array ? file.ignoreTsUrl :
                                         file.ignoreTsUrl ? [ file.ignoreTsUrl ] : [];
+            config.ignoreSource     = file.ignoreSource instanceof Array ? file.ignoreSource :
+                                        file.ignoreSource ? [ file.ignoreSource ] : [];
             config.mincss           = file.isIeHacker ? { compatibility : "ie7" } : {};
             if( !grunt.file.isDir( config.dir.srcDir ) ){
                 return false;
@@ -325,7 +349,8 @@ tool    = {
     initHandler : function(){
         tool.getHandleDir();
         if( config.dir.jadeDir && config.dir.srcDir && config.dir.pubDir ){
-            tool.getHtmlFiles( config.dir.jadeDir );
+            tool.getHtmlFiles( config.dir.jadeDir )
+                .copyOtherFiles();
         };
         E( "replace completed!!" );
     }
