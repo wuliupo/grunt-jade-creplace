@@ -38,9 +38,10 @@ Jade    = function( url ){
         js          : 0,
         css         : 0,
         tp          : "=" + _tp + "=",
-        name        : url.replace( /.*[\/|\\](.*)$/g , "$1" ),
+        name        : Path.parse( url).name,
         md5         : tool.getRandMd5( config.md5 + _tp + parseInt( Math.random() * 999999999 ) )
     }
+    this.config.md5     = this.config.name + "." + this.config.md5;
     Jade.fn.lists.push( this );
     this.handle();
 }
@@ -84,7 +85,7 @@ Jade.fn     = Jade.prototype    = {
             };
         };
         if( _js.length ){
-            _al[ _al.length - 2 ] += "\nscript(src='" + config.redirectOrigin + _url + "')";
+            _al[ _al.length - 2 ] += "script(src='" + config.redirectOrigin + _url + "')";
             this.config.js = _js;
             tool.uglifyJs( this.config , Path.join( config.dir.pubDir , _url ) );
             tool.concatDone( _js , this.config , Path.join( config.dir.pubDir , _url ) );
@@ -143,7 +144,8 @@ tool    = {
             resources   : {},
             ignoreUrl   : [],
             ignoreSource: false ,
-            redirectOrigin : ""
+            redirectOrigin  : "" ,
+            originHost      : ""
         }
         return this;
     } ,
@@ -296,6 +298,7 @@ tool    = {
             if( config.ignoreSource[ i ] === filePath ){
                 _isPass = true;
                 _exists = false;
+                _isIgnore   = true;
                 break;
             }
         }
@@ -325,7 +328,7 @@ tool    = {
             config.dir = {
                 jadeDir     : Path.resolve( file.src.toString() ),
                 pubDir      : Path.resolve( file.dest.toString() ) ,
-                srcDir      : Path.resolve( file.tempSrc.toString() )
+                srcDir      : Path.resolve( file.dest.toString() )
             };
             config.ieHacker         = file.isIeHacker;
             config.redirectOrigin   = file.redirectOrigin || "";
@@ -339,10 +342,6 @@ tool    = {
             if( !grunt.file.isDir( config.dir.srcDir ) ){
                 return false;
             };
-            if( grunt.file.isDir( config.dir.pubDir ) ){
-                grunt.file.delete( config.dir.pubDir , { force : true } );
-            };
-            grunt.file.mkdir( config.dir.pubDir );
         } );
         return this;
     },
