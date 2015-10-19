@@ -49,7 +49,8 @@ Jade    = function( url ){
 Jade.fn     = Jade.prototype    = {
     lists   : [] ,
     handle  : function(){
-        var _content    = grunt.file.read( this.config.url ).toString();
+        // jade去文件注释
+        var _content    = grunt.file.read( this.config.url ).toString().replace( /\/{2}-[^\r|^\n]*/gi , "" );
         this.config.jade = _content;
         try {
             this.config.jade = this.replaceCss();
@@ -66,29 +67,25 @@ Jade.fn     = Jade.prototype    = {
     replaceJs : function(){
         var _replace    = this.config.tp + "$1" + this.config.tp,
             _al         = this.config.jade.replace( /(script\([^\)|^\n|^\r]*\))/gi , _replace ).split( this.config.tp ),
-            _js         = [],
-            _url        = "js/" + this.config.md5 + ".js";
+            _url        = "js/" + this.config.md5 + ".js" ,
+            _filePath;
         for( var i = _al.length; i--; ){
             if( i % 2 ){
                 _al[ i ]    = _al[ i ].replace( /\s/gi , "" );
                 tool.checkFileStatus( _al[ i ].replace( /.*src=['|"]([^'|^"]*)['|"].*/gi , "$1" ) , function( exists , filePath ){
-                    if( exists ){
-                        _js.push( filePath );
-                        _al[ i ] = "";
-                    } else {
-                        if( !config.filePath.fetchUrl[ filePath ] ){
-                            config.filePath.fetchUrl[ filePath ] = tool.getFileTs( filePath );
+                    if( !config.filePath.fetchUrl[ filePath ] ){
+                        _url    = tool.getFileTs( filePath );
+                        if( exists ){
+                            _filePath   = Path.parse( filePath );
+                            _url = _filePath.dir + "/" + _filePath.name + "." + tool.getRandMd5() + ".js";
+                            tool.uglifyJs( Path.join( config.dir.srcDir , filePath ) , Path.join( config.dir.pubDir , _url ) );
+                            _url = config.redirectOrigin + _url;
                         }
-                        _al[ i ] = _al[ i ].replace( /(.*src=['|"])([^'|^"]*)(['|"].*)/gi , "$1" + config.filePath.fetchUrl[ filePath ] + "$3" );
-                    };
+                        config.filePath.fetchUrl[ filePath ] = _url;
+                    }
+                    _al[ i ] = _al[ i ].replace( /(.*src=['|"])([^'|^"]*)(['|"].*)/gi , "$1" + config.filePath.fetchUrl[ filePath ] + "$3" );
                 } );
             };
-        };
-        if( _js.length ){
-            _al[ _al.length - 2 ] += "script(src='" + config.redirectOrigin + _url + "')";
-            this.config.js = _js;
-            tool.uglifyJs( this.config , Path.join( config.dir.pubDir , _url ) );
-            tool.concatDone( _js , this.config , Path.join( config.dir.pubDir , _url ) );
         };
         return _al.join( "" );
     },
@@ -266,19 +263,15 @@ tool    = {
     } ,
     /*!
      *  压缩文件
-     *  @replace    {object}    replace 的配置文
+     *  @filePath   {string}    文件的目标地址
      *  @dest       {string}    保存的目标地址
      *  return      {string}
      */
-    uglifyJs : function( replace , dest ){
-        var _urls = [];
-        for( var i = replace.js.length; i--; ){
-            _urls.push( Path.join( config.dir.srcDir , replace.js[ i ] ) );
-        };
+    uglifyJs : function( filePath , dest ){
         try{
-            grunt.file.write( dest , minjs.minify( _urls ).code.toString() );   
+            grunt.file.write( dest , minjs.minify( filePath ).code.toString() );   
         } catch( e ){
-            E( "Error : uglifyJS error. check js files " + _urls.join( " ; " ) );
+            E( "Error : uglifyJS error. check js file " + filePath );
         }
     },
     checkFileStatus : function( filePath , func ){
