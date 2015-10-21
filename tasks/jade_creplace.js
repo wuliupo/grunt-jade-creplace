@@ -55,6 +55,7 @@ Jade.fn     = Jade.prototype    = {
         try {
             this.config.jade = this.replaceCss();
             this.config.jade = this.replaceJs();
+            this.config.jade = this.replaceImg();
             grunt.file.write( this.config.dest , this.config.jade );
             E( "page : " + this.config.url + " build success!" );
         } catch( e ){
@@ -67,7 +68,7 @@ Jade.fn     = Jade.prototype    = {
     replaceJs : function(){
         var _replace    = this.config.tp + "$1" + this.config.tp,
             _al         = this.config.jade.replace( /(script\([^\)|^\n|^\r]*\))/gi , _replace ).split( this.config.tp ),
-            _url        = "js/" + this.config.md5 + ".js" ,
+            _url ,
             _filePath;
         for( var i = _al.length; i--; ){
             if( i % 2 ){
@@ -118,6 +119,30 @@ Jade.fn     = Jade.prototype    = {
         };
         return _al.join( "" );
     },
+    replaceImg: function(){
+        var _replace    = this.config.tp + "$1" + this.config.tp,
+            _al         = this.config.jade.replace( /(img.*\(.*src=['|"][^'|^"]*['|"].*\))/gi , _replace ).split( this.config.tp ),
+            _url ,
+            _filePath;
+        for( var i = _al.length; i--; ){
+            if( i % 2 ){
+                _al[ i ]    = _al[ i ].replace( /\s/gi , "" );
+                tool.checkFileStatus( _al[ i ].replace( /.*src=['|"]([^'|^"]*)['|"].*/gi , "$1" ) , function( exists , filePath ){
+                    if( !config.filePath.fetchUrl[ filePath ] ){
+                        if( exists ){
+                            _filePath   = Path.parse( filePath );
+                            _url = _filePath.dir + "/" + _filePath.name + "." + tool.getRandMd5() + _filePath.ext;
+                            tool.copyFile( Path.join( config.dir.srcDir , filePath ) , Path.join( config.dir.pubDir , _url ) );   
+                            _url = config.redirectOrigin + _url;
+                        }
+                        config.filePath.fetchUrl[ filePath ] = _url;
+                    }
+                    _al[ i ] = _al[ i ].replace( /(.*src=['|"])([^'|^"]*)(['|"].*)/gi , "$1" + config.filePath.fetchUrl[ filePath ] + "$3" );
+                } );
+            };
+        };
+        return _al.join( "" );
+    }
 };
 
 tool    = {
@@ -272,6 +297,13 @@ tool    = {
             grunt.file.write( dest , minjs.minify( filePath ).code.toString() );   
         } catch( e ){
             E( "Error : uglifyJS error. check js file " + filePath );
+        }
+    },
+    copyFile : function( filePath , dest ){
+        try{
+            grunt.file.copy( filePath , dest );   
+        } catch( e ){
+            E( "Error : copy file error. check file " + filePath );
         }
     },
     checkFileStatus : function( filePath , func ){
