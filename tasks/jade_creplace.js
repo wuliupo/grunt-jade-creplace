@@ -128,16 +128,16 @@ Jade.fn     = Jade.prototype    = {
             if( i % 2 ){
                 _al[ i ]    = _al[ i ].replace( /\s/gi , "" );
                 tool.checkFileStatus( _al[ i ].replace( /.*src=['|"]([^'|^"]*)['|"].*/gi , "$1" ) , function( exists , filePath ){
-                    if( !config.filePath.fetchUrl[ filePath ] ){
-                        if( exists ){
+                    if( exists ){
+                        if( !config.filePath.fetchUrl[ filePath ] ){
                             _filePath   = Path.parse( filePath );
                             _url = _filePath.dir + "/" + _filePath.name + "." + tool.getRandMd5() + _filePath.ext;
                             tool.copyFile( Path.join( config.dir.srcDir , filePath ) , Path.join( config.dir.pubDir , _url ) );   
                             _url = config.redirectOrigin + _url;
+                            config.filePath.fetchUrl[ filePath ] = _url;
                         }
-                        config.filePath.fetchUrl[ filePath ] = _url;
+                        _al[ i ] = _al[ i ].replace( /(.*src=['|"])([^'|^"]*)(['|"].*)/gi , "$1" + config.filePath.fetchUrl[ filePath ] + "$3" );
                     }
-                    _al[ i ] = _al[ i ].replace( /(.*src=['|"])([^'|^"]*)(['|"].*)/gi , "$1" + config.filePath.fetchUrl[ filePath ] + "$3" );
                 } );
             };
         };
