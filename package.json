@@ -1,7 +1,7 @@
 {
   "name": "grunt-jade-creplace",
   "description": "a jade-creplace plugin",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "homepage": "https://github.com/nihaox1/grunt-jade-creplace.git",
   "author": {
     "name": "bo.cheng",
