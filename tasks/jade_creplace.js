@@ -187,8 +187,7 @@ tool    = {
      *  @belong {string}    归属文件的相对地址
      */
     getResourcePath : function( url , belong ){
-        return ( belong.replace( /(.*[\/|\\]).*/gi , "$1" ) + url.replace( /[\?|\#].*/gi , "" ) ).
-                    replace( /[\\|\/][^\\|^\/]*[\\|\/]\.{2}/gi , "" );
+        return Path.resolve( belong , "../" , url );
     },
     /*!
      *  修正对应内容的图片/其它资源的引用
@@ -204,7 +203,7 @@ tool    = {
             _dest;
         for( var i = _imgs.length; i--; ){
             if( i % 2 ){
-                _img    = tool.getResourcePath( _imgs[ i ].replace( /[\'|\"|\s]*/gi , "" ) , dest );
+                _img    = tool.getResourcePath( _imgs[ i ] , dest );
                 if( !grunt.file.exists( _img ) ){
                     continue;
                 };
