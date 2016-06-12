@@ -187,7 +187,7 @@ tool    = {
      *  @belong {string}    归属文件的相对地址
      */
     getResourcePath : function( url , belong ){
-        return Path.resolve( belong , "../" , url );
+        return Path.resolve( belong , "../" , url.replace( /[\'\"]+/g , "" ) );
     },
     /*!
      *  修正对应内容的图片/其它资源的引用
@@ -352,7 +352,7 @@ tool    = {
             config.dir = {
                 jadeDir     : Path.resolve( file.src.toString() ),
                 pubDir      : Path.resolve( file.dest.toString() ) ,
-                srcDir      : Path.resolve( file.dest.toString() )
+                srcDir      : Path.resolve( file.tempSrc.toString() )
             };
             config.ieHacker         = file.isIeHacker;
             config.redirectOrigin   = file.redirectOrigin || "";
