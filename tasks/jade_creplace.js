@@ -84,7 +84,7 @@ Jade.fn     = Jade.prototype    = {
                         }
                         config.filePath.fetchUrl[ filePath ] = _url;
                     }
-                    _al[ i ] = _al[ i ].replace( /(.*src=['|"])([^'|^"]*)(['|"].*)/gi , "$1" + config.filePath.fetchUrl[ filePath ] + "$3" );
+                    _al[ i ] = _al[ i ].replace( /(.*src=['|"])([^'|^"]*)(['|"].*)/gi , "$1" + config.filePath.fetchUrl[ filePath ] + "$3" ) + "\r\n";
                 } );
             };
         };
@@ -106,7 +106,7 @@ Jade.fn     = Jade.prototype    = {
                         if( !config.filePath.fetchUrl[ filePath ] ){
                             config.filePath.fetchUrl[ filePath ] = filePath + ( /\?/.test( filePath ) ? "&" : "?" ) + tool.getRandMd5();
                         }
-                        _al[ i ] = _al[ i ].replace( /(.*href=['|"]).*(['|"].*)/i , "$1" + config.filePath.fetchUrl[ filePath ] + "$2" );
+                        _al[ i ] = _al[ i ].replace( /(.*href=['|"]).*(['|"].*)/i , "$1" + config.filePath.fetchUrl[ filePath ] + "$2" ) + "\r\n";
                     };
                 } );
             };
