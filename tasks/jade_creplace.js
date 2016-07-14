@@ -84,7 +84,7 @@ Jade.fn     = Jade.prototype    = {
                         }
                         config.filePath.fetchUrl[ filePath ] = _url;
                     }
-                    _al[ i ] = _al[ i ].replace( /(.*src=['|"])([^'|^"]*)(['|"].*)/gi , "$1" + config.filePath.fetchUrl[ filePath ] + "$3" ) + "\r\n";
+                    _al[ i ] = _al[ i ].replace( /(.*src=['|"])([^'|^"]*)(['|"].*)/gi , "$1" + config.filePath.fetchUrl[ filePath ] + "$3" );
                 } );
             };
         };
@@ -92,27 +92,35 @@ Jade.fn     = Jade.prototype    = {
     },
     replaceCss: function(){
         var _replace    = this.config.tp + "$1" + this.config.tp,
-            _al         = this.config.jade.replace( /(link\([^\)|^\n|^\r|]*\))/gi , _replace ).split( this.config.tp ),
+            _al         = this.config.jade.replace( /([^\n]*link\([^\)|^\n|^\r|]*\))/gi , _replace ).split( this.config.tp ),
             _css        = [],
-            _url        = "css/" + this.config.md5 + ".css";
+            _url        = "css/" + this.config.md5 + ".css" ,
+            _space;
         for( var i = _al.length; i--; ){
             if( i % 2 ){
+                _space      = _al[ i ].replace( /^(\s*).*/ , "$1" );
                 _al[ i ]    = _al[ i ].replace( /\s/gi , "" );
                 tool.checkFileStatus( _al[ i ].replace( /.*href=['|"](.*)['|"].*/gi , "$1" ) , function( exists , filePath ){
                     if( exists ){
                         _css.push( filePath );
-                        _al[ i ] = "";
+                        _al[ i ] = _space;
                     } else {
                         if( !config.filePath.fetchUrl[ filePath ] ){
                             config.filePath.fetchUrl[ filePath ] = filePath + ( /\?/.test( filePath ) ? "&" : "?" ) + tool.getRandMd5();
                         }
-                        _al[ i ] = _al[ i ].replace( /(.*href=['|"]).*(['|"].*)/i , "$1" + config.filePath.fetchUrl[ filePath ] + "$2" ) + "\r\n";
+                        _al[ i ] = _space + _al[ i ].replace( /(.*href=['|"]).*(['|"].*)/i , "$1" + config.filePath.fetchUrl[ filePath ] + "$2" );
                     };
                 } );
             };
         };
         if( _css.length ){
-            _al[ 1 ] += "link(rel='stylesheet',type='text/css',href='" + config.redirectOrigin + _url + "')";
+            _space      = _al[ 1 ].replace( /^(\s*).*/ , "$1" );
+            if( _space.length ){
+                _space  = "\n" + _space;
+            } else {
+                _space  = "";
+            }
+            _al[ 1 ] += _space + "link(rel='stylesheet',type='text/css',href='" + config.redirectOrigin + _url + "')";
             this.config.css = _css;
             tool.uglifyCss( this.config , Path.join( config.dir.pubDir , _url ) );
             tool.concatDone( _css , this.config , Path.join( config.dir.pubDir , _url ) );
@@ -121,7 +129,7 @@ Jade.fn     = Jade.prototype    = {
     },
     replaceImg: function(){
         var _replace    = this.config.tp + "$1" + this.config.tp,
-            _al         = this.config.jade.replace( /(img.*\(.*src=['|"][^'|^"]*['|"].*\))/gi , _replace ).split( this.config.tp ),
+            _al         = this.config.jade.replace( /(img.*\(.*src=['|"][^'|^"|^\{+]*['|"].*\))/gi , _replace ).split( this.config.tp ),
             _url ,
             _filePath;
         for( var i = _al.length; i--; ){
