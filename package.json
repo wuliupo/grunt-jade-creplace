@@ -1,7 +1,7 @@
 {
   "name": "grunt-jade-creplace",
   "description": "a jade-creplace plugin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "homepage": "https://github.com/nihaox1/grunt-jade-creplace.git",
   "author": {
     "name": "bo.cheng",
@@ -29,7 +29,7 @@
   "dependencies": {
     "grunt": "~0.4.5" ,
     "md5"   : "^2.0.0" ,
-    "uglify-js"     : "^2.4.15",
+    "uglify-js"     : "2.6.0",
     "clean-css"     : "^2.2.1" ,
     "underscore"    : "^1.8.3"
   },
