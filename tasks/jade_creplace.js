@@ -92,35 +92,27 @@ Jade.fn     = Jade.prototype    = {
     },
     replaceCss: function(){
         var _replace    = this.config.tp + "$1" + this.config.tp,
-            _al         = this.config.jade.replace( /([^\n]*link\([^\)|^\n|^\r|]*\))/gi , _replace ).split( this.config.tp ),
+            _al         = this.config.jade.replace( /(link\([^\)|^\n|^\r|]*\))/gi , _replace ).split( this.config.tp ),
             _css        = [],
-            _url        = "css/" + this.config.md5 + ".css" ,
-            _space;
+            _url        = "css/" + this.config.md5 + ".css";
         for( var i = _al.length; i--; ){
             if( i % 2 ){
-                _space      = _al[ i ].replace( /^(\s*).*/ , "$1" );
                 _al[ i ]    = _al[ i ].replace( /\s/gi , "" );
                 tool.checkFileStatus( _al[ i ].replace( /.*href=['|"](.*)['|"].*/gi , "$1" ) , function( exists , filePath ){
                     if( exists ){
                         _css.push( filePath );
-                        _al[ i ] = _space;
+                        _al[ i ] = "";
                     } else {
                         if( !config.filePath.fetchUrl[ filePath ] ){
                             config.filePath.fetchUrl[ filePath ] = filePath + ( /\?/.test( filePath ) ? "&" : "?" ) + tool.getRandMd5();
                         }
-                        _al[ i ] = _space + _al[ i ].replace( /(.*href=['|"]).*(['|"].*)/i , "$1" + config.filePath.fetchUrl[ filePath ] + "$2" );
+                        _al[ i ] = _al[ i ].replace( /(.*href=['|"]).*(['|"].*)/i , "$1" + config.filePath.fetchUrl[ filePath ] + "$2" );
                     };
                 } );
             };
         };
         if( _css.length ){
-            _space      = _al[ 1 ].replace( /^(\s*).*/ , "$1" );
-            if( _space.length ){
-                _space  = "\n" + _space;
-            } else {
-                _space  = "";
-            }
-            _al[ 1 ] += _space + "link(rel='stylesheet',type='text/css',href='" + config.redirectOrigin + _url + "')";
+            _al[ 1 ] += "link(rel='stylesheet',type='text/css',href='" + config.redirectOrigin + _url + "')";
             this.config.css = _css;
             tool.uglifyCss( this.config , Path.join( config.dir.pubDir , _url ) );
             tool.concatDone( _css , this.config , Path.join( config.dir.pubDir , _url ) );
@@ -129,7 +121,7 @@ Jade.fn     = Jade.prototype    = {
     },
     replaceImg: function(){
         var _replace    = this.config.tp + "$1" + this.config.tp,
-            _al         = this.config.jade.replace( /(img.*\(.*src=['|"][^'|^"|^\{+]*['|"].*\))/gi , _replace ).split( this.config.tp ),
+            _al         = this.config.jade.replace( /(img.*\(.*src=['|"][^'|^"]*['|"].*\))/gi , _replace ).split( this.config.tp ),
             _url ,
             _filePath;
         for( var i = _al.length; i--; ){
@@ -140,7 +132,7 @@ Jade.fn     = Jade.prototype    = {
                         if( !config.filePath.fetchUrl[ filePath ] ){
                             _filePath   = Path.parse( filePath );
                             _url = _filePath.dir + "/" + _filePath.name + "." + tool.getRandMd5() + _filePath.ext;
-                            tool.copyFile( Path.join( config.dir.srcDir , filePath ) , Path.join( config.dir.pubDir , _url ) );   
+                            tool.copyFile( Path.join( config.dir.srcDir , filePath ) , Path.join( config.dir.pubDir , _url ) );
                             _url = config.redirectOrigin + _url;
                             config.filePath.fetchUrl[ filePath ] = _url;
                         }
@@ -180,7 +172,7 @@ tool    = {
         return this;
     } ,
     getRandMd5  : function( tp ){
-       return MD5( config.md5 + ( tp || new Date().getTime() ) + parseInt( Math.random() * 999999999 ) ); 
+       return MD5( config.md5 + ( tp || new Date().getTime() ) + parseInt( Math.random() * 999999999 ) );
     } ,
     delFileFromHash : function( url ){
         if( config.filePath.js[ url ] ){
@@ -301,7 +293,7 @@ tool    = {
      */
     uglifyJs : function( filePath , dest ){
         try{
-            grunt.file.write( dest , minjs.minify( filePath ).code.toString() );   
+            grunt.file.write( dest , minjs.minify( filePath , { output : { quote_keys : true } } ).code.toString() );
         } catch( e ){
             E( "Error : uglifyJS error. check js file " + filePath );
         }
