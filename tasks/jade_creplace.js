@@ -78,8 +78,7 @@ Jade.fn     = Jade.prototype    = {
                         _url    = tool.getFileTs( filePath );
                         if( exists ){
                             _filePath   = Path.parse( filePath );
-                            _url = _filePath.dir + "/" + _filePath.name + "." + tool.getRandMd5() + ".js";
-                            tool.uglifyJs( Path.join( config.dir.srcDir , filePath ) , Path.join( config.dir.pubDir , _url ) );
+                            _url = tool.uglifyJs( Path.join( config.dir.srcDir , filePath ) , _filePath.dir + "/" + _filePath.name + "." );
                             _url = config.redirectOrigin + _url;
                         }
                         config.filePath.fetchUrl[ filePath ] = _url;
@@ -94,7 +93,7 @@ Jade.fn     = Jade.prototype    = {
         var _replace    = this.config.tp + "$1" + this.config.tp,
             _al         = this.config.jade.replace( /(link\([^\)|^\n|^\r|]*\))/gi , _replace ).split( this.config.tp ),
             _css        = [],
-            _url        = "css/" + this.config.md5 + ".css";
+            _url;
         for( var i = _al.length; i--; ){
             if( i % 2 ){
                 _al[ i ]    = _al[ i ].replace( /\s/gi , "" );
@@ -112,10 +111,10 @@ Jade.fn     = Jade.prototype    = {
             };
         };
         if( _css.length ){
-            _al[ 1 ] += "link(rel='stylesheet',type='text/css',href='" + config.redirectOrigin + _url + "')";
             this.config.css = _css;
-            tool.uglifyCss( this.config , Path.join( config.dir.pubDir , _url ) );
+            _url    = tool.uglifyCss( this.config );
             tool.concatDone( _css , this.config , Path.join( config.dir.pubDir , _url ) );
+            _al[ 1 ] += "link(rel='stylesheet',type='text/css',href='" + config.redirectOrigin + _url + "')";
         };
         return _al.join( "" );
     },
@@ -189,6 +188,14 @@ tool    = {
     getResourcePath : function( url , belong ){
         return Path.resolve( belong , "../" , url.replace( /[\'\"]+/g , "" ) );
     },
+    getFileMD5  : function( filePath ){
+        var _buffer     = grunt.file.read( filePath ).toString();
+        return [
+                "resources/",
+                MD5( _buffer ),
+                filePath.replace( /.*(\..*)$/gi , "$1" )
+            ].join( "" );
+    } ,
     /*!
      *  修正对应内容的图片/其它资源的引用
      *  @str    {string}    内容
@@ -208,11 +215,7 @@ tool    = {
                     continue;
                 };
                 if( !config.resources[ _img ] ){
-                    _md5    = [
-                        "resources/",
-                        tool.getRandMd5(),
-                        _img.replace( /.*(\..*)$/gi , "$1" )
-                    ].join( "" );
+                    _md5    = tool.getFileMD5( _img );
                     config.resources[ _img ] = _md5;
                 } else {
                     _md5 = config.resources[ _img ];
@@ -270,11 +273,12 @@ tool    = {
      *  @dest       {string}    保存的目标地址
      *  return      {string}
      */
-    uglifyCss : function( replace , dest ){
+    uglifyCss : function( replace ){
         var _buffer = [],
             _url,
             _code,
-            _files  = replace.css;
+            _files  = replace.css ,
+            _filename;
         for( var i = _files.length; i--; ){
             _url    = Path.join( config.dir.srcDir , _files[ i ] );
             if( grunt.file.exists( _url ) ){
@@ -283,7 +287,9 @@ tool    = {
             };
         };
         _code = new mincss( config.mincss ).minify( _buffer.join( "" ) );
-        grunt.file.write( dest , _code );
+        _filename   = "css/" + MD5( _code ) + ".css";
+        grunt.file.write( Path.join( config.dir.pubDir , _filename ) , _code );
+        return _filename;
     } ,
     /*!
      *  压缩文件
@@ -291,12 +297,15 @@ tool    = {
      *  @dest       {string}    保存的目标地址
      *  return      {string}
      */
-    uglifyJs : function( filePath , dest ){
+    uglifyJs : function( filePath , prefix ){
         try{
-            grunt.file.write( dest , minjs.minify( filePath , { output : { quote_keys : true } } ).code.toString() );
+            var _content    = minjs.minify( filePath ).code.toString() ,
+                _filename   = prefix + MD5( _content ) + ".js";
+            grunt.file.write( Path.join( config.dir.pubDir , _filename ) , _content );
         } catch( e ){
             E( "Error : uglifyJS error. check js file " + filePath );
         }
+        return _filename;
     },
     copyFile : function( filePath , dest ){
         try{
