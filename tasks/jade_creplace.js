@@ -50,7 +50,7 @@ Jade.fn     = Jade.prototype    = {
     lists   : [] ,
     handle  : function(){
         // jade去文件注释
-        var _content    = grunt.file.read( this.config.url ).toString().replace( /\/{2}-[^\r|^\n]*/gi , "" );
+        var _content    = grunt.file.read( this.config.url ).toString().replace( /\/{2}-[^\n]*/gi , "" );
         this.config.jade = _content;
         try {
             this.config.jade = this.replaceCss();
