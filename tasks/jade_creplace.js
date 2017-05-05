@@ -125,7 +125,7 @@ Jade.fn     = Jade.prototype    = {
             _filePath;
         for( var i = _al.length; i--; ){
             if( i % 2 ){
-                _al[ i ]    = _al[ i ].replace( /\s/gi , "" );
+                _al[ i ]    = _al[ i ].replace( /\s+/gi , " " );
                 tool.checkFileStatus( _al[ i ].replace( /.*src=['|"]([^'|^"]*)['|"].*/gi , "$1" ) , function( exists , filePath ){
                     if( exists ){
                         if( !config.filePath.fetchUrl[ filePath ] ){
