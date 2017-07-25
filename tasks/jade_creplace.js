@@ -66,8 +66,8 @@ Jade.fn     = Jade.prototype    = {
      *  替换jade文本中的 JS项
      */
     replaceJs : function(){
-        var _replace    = this.config.tp + "$1" + this.config.tp,
-            _al         = this.config.jade.replace( /(script\([^\)|^\n|^\r]*\))/gi , _replace ).split( this.config.tp ),
+        var _replace    = "$1" + this.config.tp + "$2" + this.config.tp,
+            _al         = this.config.jade.replace( /(^\s*)(script\([^\)|^\n|^\r]*\))/gm , _replace ).split( this.config.tp ),
             _url ,
             _filePath;
         for( var i = _al.length; i--; ){
@@ -90,8 +90,8 @@ Jade.fn     = Jade.prototype    = {
         return _al.join( "" );
     },
     replaceCss: function(){
-        var _replace    = this.config.tp + "$1" + this.config.tp,
-            _al         = this.config.jade.replace( /(link\([^\)|^\n|^\r|]*\))/gi , _replace ).split( this.config.tp ),
+        var _replace    = "$1" + this.config.tp + "$2" + this.config.tp,
+            _al         = this.config.jade.replace( /(^\s*)(link\([^\)|^\n|^\r|]*\))/gm , _replace ).split( this.config.tp ),
             _css        = [],
             _url;
         for( var i = _al.length; i--; ){
