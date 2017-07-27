@@ -114,6 +114,7 @@ Jade.fn     = Jade.prototype    = {
             this.config.css = _css;
             _url    = tool.uglifyCss( this.config );
             tool.concatDone( _css , this.config , Path.join( config.dir.pubDir , _url ) );
+            /^\s+$/.test( _al[ 2 ] ) && ( _al[ 1 ] += _al[ 2 ] );
             _al[ 1 ] += "link(rel='stylesheet',type='text/css',href='" + config.redirectOrigin + _url + "')";
         };
         return _al.join( "" );
