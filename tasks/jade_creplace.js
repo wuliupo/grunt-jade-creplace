@@ -73,7 +73,7 @@ Jade.fn     = Jade.prototype    = {
         for( var i = _al.length; i--; ){
             if( i % 2 ){
                 _al[ i ]    = _al[ i ].replace( /\s/gi , "" );
-                tool.checkFileStatus( _al[ i ].replace( /.*src=['|"]([^'|^"]*)['|"].*/gi , "$1" ) , function( exists , filePath ){
+                tool.checkFileStatus( _al[ i ].replace( /[^\:]*src=['|"]([^'|^"]*)['|"].*/gi , "$1" ) , function( exists , filePath ){
                     if( !config.filePath.fetchUrl[ filePath ] ){
                         _url    = tool.getFileTs( filePath );
                         if( exists ){
@@ -97,7 +97,7 @@ Jade.fn     = Jade.prototype    = {
         for( var i = _al.length; i--; ){
             if( i % 2 ){
                 _al[ i ]    = _al[ i ].replace( /\s/gi , "" );
-                tool.checkFileStatus( _al[ i ].replace( /.*href=['|"](.*)['|"].*/gi , "$1" ) , function( exists , filePath ){
+                tool.checkFileStatus( _al[ i ].replace( /[^\:]*href=['|"](.*)['|"].*/gi , "$1" ) , function( exists , filePath ){
                     if( exists ){
                         _css.push( filePath );
                         _al[ i ] = "";
@@ -127,7 +127,7 @@ Jade.fn     = Jade.prototype    = {
         for( var i = _al.length; i--; ){
             if( i % 2 ){
                 _al[ i ]    = _al[ i ].replace( /\s+/gi , " " );
-                tool.checkFileStatus( _al[ i ].replace( /.*src=['|"]([^'|^"]*)['|"].*/gi , "$1" ) , function( exists , filePath ){
+                tool.checkFileStatus( _al[ i ].replace( /[^\:]*src=['|"]([^'|^"]*)['|"].*/gi , "$1" ) , function( exists , filePath ){
                     if( exists ){
                         if( !config.filePath.fetchUrl[ filePath ] ){
                             _filePath   = Path.parse( filePath );
