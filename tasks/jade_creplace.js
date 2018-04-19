@@ -74,16 +74,18 @@ Jade.fn     = Jade.prototype    = {
             if( i % 2 ){
                 _al[ i ]    = _al[ i ].replace( /\s/gi , "" );
                 tool.checkFileStatus( _al[ i ].replace( /[^\:]*src=['|"]([^'|^"]*)['|"].*/gi , "$1" ) , function( exists , filePath ){
-                    if( !config.filePath.fetchUrl[ filePath ] ){
-                        _url    = tool.getFileTs( filePath );
-                        if( exists ){
-                            _filePath   = Path.parse( filePath );
-                            _url = tool.uglifyJs( Path.join( config.dir.srcDir , filePath ) , _filePath.dir + "/" + _filePath.name + "." );
-                            _url = config.redirectOrigin + _url;
+                    if( filePath ){
+                        if(!config.filePath.fetchUrl[ filePath ] ){
+                            _url    = tool.getFileTs( filePath );
+                            if( exists ){
+                                _filePath   = Path.parse( filePath );
+                                _url = tool.uglifyJs( Path.join( config.dir.srcDir , filePath ) , _filePath.dir + "/" + _filePath.name + "." );
+                                _url = config.redirectOrigin + _url;
+                            }
+                            config.filePath.fetchUrl[ filePath ] = _url;
                         }
-                        config.filePath.fetchUrl[ filePath ] = _url;
+                        _al[ i ] = _al[ i ].replace( /(.*src=['|"])([^'|^"]*)(['|"].*)/gi , "$1" + config.filePath.fetchUrl[ filePath ] + "$3" );
                     }
-                    _al[ i ] = _al[ i ].replace( /(.*src=['|"])([^'|^"]*)(['|"].*)/gi , "$1" + config.filePath.fetchUrl[ filePath ] + "$3" );
                 } );
             };
         };
@@ -98,15 +100,17 @@ Jade.fn     = Jade.prototype    = {
             if( i % 2 ){
                 _al[ i ]    = _al[ i ].replace( /\s/gi , "" );
                 tool.checkFileStatus( _al[ i ].replace( /[^\:]*href=['|"](.*)['|"].*/gi , "$1" ) , function( exists , filePath ){
-                    if( exists ){
-                        _css.push( filePath );
-                        _al[ i ] = "";
-                    } else {
-                        if( !config.filePath.fetchUrl[ filePath ] ){
-                            config.filePath.fetchUrl[ filePath ] = filePath + ( /\?/.test( filePath ) ? "&" : "?" ) + tool.getRandMd5();
-                        }
-                        _al[ i ] = _al[ i ].replace( /(.*href=['|"]).*(['|"].*)/i , "$1" + config.filePath.fetchUrl[ filePath ] + "$2" ) + "\n";
-                    };
+                    if( filePath ){
+                        if( exists ){
+                            _css.push( filePath );
+                            _al[ i ] = "";
+                        } else {
+                            if( !config.filePath.fetchUrl[ filePath ] ){
+                                config.filePath.fetchUrl[ filePath ] = filePath + ( /\?/.test( filePath ) ? "&" : "?" ) + tool.getRandMd5();
+                            }
+                            _al[ i ] = _al[ i ].replace( /(.*href=['|"]).*(['|"].*)/i , "$1" + config.filePath.fetchUrl[ filePath ] + "$2" ) + "\n";
+                        };
+                    }
                 } );
             };
         };
@@ -128,7 +132,7 @@ Jade.fn     = Jade.prototype    = {
             if( i % 2 ){
                 _al[ i ]    = _al[ i ].replace( /\s+/gi , " " );
                 tool.checkFileStatus( _al[ i ].replace( /[^\:]*src=['|"]([^'|^"]*)['|"].*/gi , "$1" ) , function( exists , filePath ){
-                    if( exists ){
+                    if( exists && filePath ){
                         if( !config.filePath.fetchUrl[ filePath ] ){
                             _filePath   = Path.parse( filePath );
                             _url = _filePath.dir + "/" + _filePath.name + "." + tool.getRandMd5() + _filePath.ext;
@@ -310,7 +314,7 @@ tool    = {
     },
     copyFile : function( filePath , dest ){
         try{
-            grunt.file.copy( filePath , dest );   
+            grunt.file.copy( filePath , dest );
         } catch( e ){
             E( "Error : copy file error. check file " + filePath );
         }
@@ -366,7 +370,7 @@ tool    = {
             };
             config.ieHacker         = file.isIeHacker;
             config.redirectOrigin   = file.redirectOrigin || "";
-            config.ignoreUrl        = file.ignoreUrl instanceof Array ? file.ignoreUrl : 
+            config.ignoreUrl        = file.ignoreUrl instanceof Array ? file.ignoreUrl :
                                         file.ignoreUrl ? [ file.ignoreUrl ] : [];
             config.ignoreTsUrl      = file.ignoreTsUrl instanceof Array ? file.ignoreTsUrl :
                                         file.ignoreTsUrl ? [ file.ignoreTsUrl ] : [];
