@@ -1,5 +1,5 @@
 {
-  "name": "grunt-jade-creplace",
+  "name": "@qxwz/grunt-jade-creplace",
   "description": "a jade-creplace plugin",
   "version": "0.1.9",
   "homepage": "https://github.com/nihaox1/grunt-jade-creplace.git",
