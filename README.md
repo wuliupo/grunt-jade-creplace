@@ -1,11 +1,12 @@
 # A jade-creplace plugin
 
+<https://github.com/wuliupo/grunt-jade-creplace>
 <https://github.com/nihaox1/grunt-jade-creplace>
 
 ## Usage
 
 ```js
-# Gruntfile.js
+// Gruntfile.js
 module.exports = function (grunt) {
     require("time-grunt")(grunt);
     require("load-grunt-config")(grunt, {
@@ -24,7 +25,7 @@ module.exports = function (grunt) {
 ```
 
 ```yaml
-#jadereplace.yaml
+# jadereplace.yaml
 product     :
     src         : <%= src %>/
     dest        : <%= dist %>/
