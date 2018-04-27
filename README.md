@@ -18,7 +18,7 @@ module.exports = function (grunt) {
             dist: "dist",
             dev: "dev",
             ignoreUrl: [/.*hm\.baidu\.com\/hm\.js.*/, /.*w\.cnzz\.com\/q_stat\.php.*/, /#{/i],
-            redirect: "//static.qxwz.com/subdomain"
+            redirect: "//static.google.com/subdomain"
         }
     });
 };
